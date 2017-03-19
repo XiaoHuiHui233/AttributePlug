@@ -1,0 +1,58 @@
+version: '1.0'
+GUI:
+  title: '&3升级你的属性！'
+  name: '&a你的原始属性如下'
+  line: '&3**************************'
+  style: '   &a%ATTRNAME%&3: &1%ATTRVALUE%'
+database:
+  enable: true
+  host: localhost
+  port: 3306
+  username: 'root'
+  password: ''
+count: 1
+list:
+  1:
+    name: '&B属性强化宝石一阶'
+    lore:
+      - '&3***********************'
+      - '                         '
+      - '&a      随机强化一个属性'
+      - '&a        概率10%'
+      - '                         '
+      - '&3***********************'
+    id: 276
+    chance: 10
+    attr: 10
+    money: 100
+more:
+    ATTACK:
+      name: '攻击加成'
+      maxlevel: 1000
+    DEFENSE:
+      name: '防御'
+      maxlevel: 1000
+    CRIT:
+      name: '暴击几率'
+      maxlevel: 1000
+    CRIT_DMG:
+      name: '暴击伤害'
+      maxlevel: 1000
+    DODGE:
+      name: '闪避'
+      maxlevel: 1000
+    BLOOD_DRINK:
+      name: '嗜血几率'
+      maxlevel: 1000
+    BLOOD_DRINK_DMG:
+      name: '嗜血量'
+      maxlevel: 1000
+    PLAYER_DAMAGED:
+      name: '对玩家伤害加成'
+      maxlevel: 1000
+    ENTITY_DAMAGED:
+      name: '对怪物伤害加成'
+      maxlevel: 1000
+    EX_HEAL:
+      name: '额外生命恢复'
+      maxlevel: 1000

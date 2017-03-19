@@ -1,0 +1,10 @@
+name: Attribute
+main: com.XiaoHuiHui.minecraft.plugin.Attribute.AMain
+version: '00.00.17 beta'
+author: XiaoHuiHui
+depend: [Vault]
+commands:
+    attribute:
+        description: 玩家属性插件
+        usage: /attr check查询你的属性信息
+        aliases: attr
