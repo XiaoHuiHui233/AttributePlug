@@ -42,9 +42,12 @@ public enum AAttr {
 			return "对怪物伤害加成";
 		case EX_HEAL:
 			return "额外生命恢复";
+		case HEALTH:
+			return "生命";
+		case BRAMBLES:
+			return "荆棘";
 		default:
 			return null;
-			
 		}
 	}
 }

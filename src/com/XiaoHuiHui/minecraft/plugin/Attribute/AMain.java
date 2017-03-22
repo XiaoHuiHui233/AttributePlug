@@ -26,7 +26,7 @@ public class AMain extends JavaPlugin{
 	
 	private boolean isError=false;
 	
-	public static final String version="v00.00.17 beta";
+	public static final String version="v00.00.33 beta";
 
 	//getter and setter
 	public AGUIListener getGuiListener() {
@@ -71,17 +71,6 @@ public class AMain extends JavaPlugin{
 	
 	@Override
 	public void onEnable(){
-		if(isError()){
-			getLogger().log(Level.SEVERE,"插件启动异常！已自动关闭！");
-			getServer().getPluginManager().disablePlugin(this);
-		}else{
-			getLogger().info("插件启动完毕！版本:" +version + " 制作:小灰灰");
-		}
-	}
-	
-	@Override
-	public void onLoad(){
-		getLogger().info("插件正在启动中... 版本:" +version + " 制作:小灰灰");
 		AData.init(this);
 		ADatabase.init();
 		AEco.init(this);
@@ -97,6 +86,17 @@ public class AMain extends JavaPlugin{
 		getServer().getPluginManager().registerEvents(getGuiListener(), this);
 		getServer().getPluginCommand("attribute").setExecutor(getCmd());
 		getData().load();
+		if(isError()){
+			getLogger().log(Level.SEVERE,"插件启动异常！已自动关闭！");
+			getServer().getPluginManager().disablePlugin(this);
+		}else{
+			getLogger().info("插件启动完毕！版本:" +version + " 制作:小灰灰");
+		}
+	}
+	
+	@Override
+	public void onLoad(){
+		getLogger().info("插件正在启动中... 版本:" +version + " 制作:小灰灰");
 	}
 	
 	@Override

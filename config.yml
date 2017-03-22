@@ -1,7 +1,7 @@
 version: '1.0'
 GUI:
   title: '&3升级你的属性！'
-  name: '&a你的原始属性如下'
+  name: '&a你的属性如下'
   line: '&3**************************'
   style: '   &a%ATTRNAME%&3: &1%ATTRVALUE%'
 database:
@@ -10,6 +10,8 @@ database:
   port: 3306
   username: 'root'
   password: ''
+ui:
+  warn: true
 count: 1
 list:
   1:
@@ -17,12 +19,14 @@ list:
     lore:
       - '&3***********************'
       - '                         '
-      - '&a      随机强化一个属性'
-      - '&a        概率10%'
+      - '&a  随机强化一个属性'
+      - '&a    概率10%'
+      - '&a   强化能力10%'
       - '                         '
       - '&3***********************'
     id: 276
     chance: 10
+    strong: 10
     attr: 10
     money: 100
 more:

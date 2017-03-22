@@ -83,7 +83,9 @@ public class AListener implements Listener {
 		double heal=p.getHealth();
 		//TODO:来个GUI看看
 		p.setHealth(heal+damage);
-		p.sendMessage("&a*你触发了嗜血*");
+		if(getData().isWarn()){
+			p.sendMessage("&a*你触发了嗜血*");
+		}
 	}
 	
 	//闪避
@@ -101,17 +103,19 @@ public class AListener implements Listener {
 		if(pro>dodge){
 			return;
 		}
-		String name="§3"+damager2.getType().name()+"§2";
-		if(damager2 instanceof LivingEntity){
-			LivingEntity p2=(LivingEntity)damager2;
-			name="§3"+p2.getCustomName()+"§2";
+		if(getData().isWarn()){
+			String name="§3"+damager2.getType().name()+"§2";
+			if(damager2 instanceof LivingEntity){
+				LivingEntity p2=(LivingEntity)damager2;
+				name="§3"+p2.getCustomName()+"§2";
+			}
+			if(damager2 instanceof Player){
+				Player p3=(Player)damager2;
+				name="§3"+p3.getDisplayName()+"§2";
+				p3.sendMessage("§3"+p1.getDisplayName()+"§aMISS§2了你的攻击！");
+			}
+			p1.sendMessage("§2你§aMISS§2了来自"+name+"的攻击!");
 		}
-		if(damager2 instanceof Player){
-			Player p3=(Player)damager2;
-			name="§3"+p3.getDisplayName()+"§2";
-			p3.sendMessage("§3"+p1.getDisplayName()+"§aMISS§2了你的攻击！");
-		}
-		p1.sendMessage("§2你§aMISS§2了来自"+name+"的攻击!");
 		event.setDamage(0);
 		event.setCancelled(true);
 	}
@@ -132,7 +136,9 @@ public class AListener implements Listener {
 			return;
 		}
 		damageAdd(event, add);
-		p.sendMessage("&a*你触发了暴击*");
+		if(getData().isWarn()){
+			p.sendMessage("&a*你触发了暴击*");
+		}
 	}
 	
 	//对玩家或者生物的伤害加成

@@ -49,7 +49,7 @@ public class AGUI {
 	}
 
 	public static String getLine() {
-		return line;
+		return line.replace('&', '§');
 	}
 
 	private static void setLine(String line) {
@@ -79,21 +79,11 @@ public class AGUI {
 		setStyle(getData().getStyle());
 	}
 	
-//	private static int getBits(int i){
-//		int count=0;
-//		while(i!=0){
-//			i/=10;
-//			++count;
-//		}
-//		return count;
-//	}
-	
 	public static void openUI(Player player){
 		if(!isInit){
 			throw new AssertionError();
 		}
-		Inventory inv=Bukkit.createInventory(null, InventoryType.PLAYER, getTitleGUI());
-		ItemStack item=new ItemStack(Material.STAINED_GLASS_PANE,1,(short)5);
+		Inventory inv=Bukkit.createInventory(null, InventoryType.CHEST, getTitleGUI());
 		List<String> lores=new ArrayList<String>();
 		lores.add(getLine());
 		lores.add("                          ");
@@ -103,42 +93,37 @@ public class AGUI {
 			int value=0;//data.getAttr(player, attr);
 			s=getStyle().replaceAll("%ATTRNAME%",attr.getName())
 					.replaceAll("%ATTRVALUE%", ""+value);
-//			int i=24-(s1.length()*2+getBits(value)+2);
-//			if((i & 1)==0){
-//				i/=2;
-//				for(int j=0;j<i-1;++j){
-//					s+=" ";
-//				}
-//				s+="§a"+s1;
-//				s+="§3: §2";
-//				s+=value;
-//				for(int j=0;j<i-1;++j){
-//					s+=" ";
-//				}
-//			}else{
-//				i/=2;
-//				for(int j=0;j<i;++j){
-//					s+=" ";
-//				}
-//				s+="§a"+s1;
-//				s+="§3: §2";
-//				s+=value;
-//				++i;
-//				for(int j=0;j<i;++j){
-//					s+=" ";
-//				}
-//			}			
-//			s+="§3*";
 			lores.add(s);
 		} 
 		lores.add("                          ");
 		lores.add(getLine());
-		ItemMeta itemm=item.getItemMeta();
-		itemm.setLore(lores);
-		itemm.setDisplayName(getName());
-		item.setItemMeta(itemm);
-		inv.setItem(0, item);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,getName(),lores,inv,0);
+		putItem(Material.STAINED_GLASS_PANE,(short)14,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,1);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,2);
+		putItem(Material.STAINED_GLASS_PANE,(short)4,"§6确定",new ArrayList<String>(),inv,8);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,9);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,11);
+		putItem(Material.STAINED_GLASS_PANE,(short)3,"§6取消",new ArrayList<String>(),inv,17);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,18);
+		putItem(Material.STAINED_GLASS_PANE,(short)14,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,19);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,20);
 		getData().addInvs(inv);
 		player.openInventory(inv);
+	}
+	
+	private static void putItem(Material m,short d,String n,List<String> lore,Inventory inv,int l){
+		ItemStack item=new ItemStack(m,1,d);
+		ItemMeta itemm=item.getItemMeta();
+		itemm.setLore(lore);
+		itemm.setDisplayName(n);
+		item.setItemMeta(itemm);
+		inv.setItem(l, item);
 	}
 }

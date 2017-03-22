@@ -3,6 +3,7 @@ package com.XiaoHuiHui.minecraft.plugin.Attribute.Data;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -88,6 +89,9 @@ public class AData {
 	private String host;
 	private String username;
 	private String password;
+	
+	//ui配置
+	private boolean warn;
 	
 	//getter and setter
 	public List<Inventory> getInvs(){
@@ -229,6 +233,14 @@ public class AData {
 		this.style = style.replace('&', '§');
 	}
 
+	public boolean isWarn() {
+		return warn;
+	}
+
+	public void setWarn(boolean warn) {
+		this.warn = warn;
+	}
+
 	private Map<String,Map<AAttr,Integer>> getPlayerData(){
 		return playerData;
 	}
@@ -301,11 +313,26 @@ public class AData {
 		if(name==null)
 			throw new IllegalArgumentException("name cannot be null!");
 		Map<AAttr,Integer> map=getAttrsFromPlayer(name);
+		boolean flag=false;
 		if(map==null){
+			flag=true;
 			map=new HashMap<AAttr,Integer>();
 			getPlayerData().put(name,map);
 		}
-		map.put(attr, value);
+		map.put(attr, map.get(attr)+value);
+		if(isDatabaseEnable()){
+			//TODO：数据库写入！
+		}else{
+			if(flag){
+				getDataConfig().set("players",getDataConfig().getStringList("players").add(name));
+			}
+			getDataConfig().set(name+"."+attr.name(), map.get(attr));
+			try {
+				getDataConfig().save(dataFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	//设置一个玩家的指定属性
@@ -371,6 +398,7 @@ public class AData {
 		}
 		getItemsData();
 		getGUIData();
+		getUIData();
 	}
 	
 	//读取GUI数据
@@ -380,6 +408,11 @@ public class AData {
 		setLine(getConfig().getString("GUI.line"));
 		setStyle(getConfig().getString("GUI.style"));
 		AGUI.load();
+	}
+	
+	//读取UI数据
+	private void getUIData(){
+		setWarn(getConfig().getBoolean("ui.warn"));
 	}
 	
 	//读取数据库数据
@@ -401,9 +434,11 @@ public class AData {
 		for(int i=0;i<getCount();++i){
 			temp.add(new AItem(
 					getConfig().getString("list."+(i+1)+".name").replace('&', '§'),
-					getConfig().getInt("list."+(i+1)+".id"),
+					getConfig().getStringList("list."+(i+1)+".lore"),
+					getConfig().getString("list."+(i+1)+".id"),
 					getConfig().getInt("list."+(i+1)+".chance"),
 					getConfig().getInt("list."+(i+1)+".attr"),
+					getConfig().getInt("list."+(i+1)+".strong"),
 					getConfig().getDouble("list."+(i+1)+".money")
 				));
 		}
@@ -455,7 +490,7 @@ public class AData {
 			AAttr[] attrs=AAttr.values();
 			Map<AAttr,Integer> map=new HashMap<AAttr,Integer>();
 			for(int j=0;j<attrs.length;++j){
-				int t=getConfig().getInt(name+"."+attrs[j].name());
+				int t=getDataConfig().getInt(name+"."+attrs[j].name());
 				map.put(attrs[j], t);
 			}
 			maps.put(name, map);
@@ -480,5 +515,15 @@ public class AData {
 	
 	public void outputInfo(String msg){
 		getMain().getLogger().info(msg);
+	}
+	
+	public boolean fresh(){
+		getConfig().set("ui.warn", isWarn());
+		try {
+			getConfig().save(configFile);
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 }

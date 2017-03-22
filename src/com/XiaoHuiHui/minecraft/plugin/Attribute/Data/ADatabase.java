@@ -2,11 +2,11 @@ package com.XiaoHuiHui.minecraft.plugin.Attribute.Data;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
+//import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+//import java.util.ArrayList;
+//import java.util.List;
 
 public class ADatabase {
 	private ADatabase(){
@@ -167,19 +167,19 @@ public class ADatabase {
 		}
 	}
 	
-	public static int getData(String name){
-		if(!isInit){
-			throw new AssertionError();
-		}
-		String str="SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'attribute'";
-		List<String> list=new ArrayList<String>();
-		try {//TODO
-			ResultSet rs = getStmt().executeQuery(str);
-		} catch (SQLException e) {
-			getData().outputError("数据库操作异常！");
-			e.printStackTrace();
-			return 0;
-		}
-		return 0;
-	}
+//	public static int getData(String name){
+//		if(!isInit){
+//			throw new AssertionError();
+//		}
+//		String str="SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'attribute'";
+//		List<String> list=new ArrayList<String>();
+//		try {//TODO
+//			ResultSet rs = getStmt().executeQuery(str);
+//		} catch (SQLException e) {
+//			getData().outputError("数据库操作异常！");
+//			e.printStackTrace();
+//			return 0;
+//		}
+//		return 0;
+//	}
 }
