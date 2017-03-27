@@ -90,8 +90,8 @@ public class AGUI {
 		AAttr[] attrs=AAttr.values();
 		for(AAttr attr:attrs){
 			String s;
-			int value=0;//data.getAttr(player, attr);
-			s=getStyle().replaceAll("%ATTRNAME%",attr.getName())
+			int value=data.getAttr(player, attr);
+			s=getStyle().replaceAll("%ATTRNAME%",getData().getName(attr))
 					.replaceAll("%ATTRVALUE%", ""+value);
 			lores.add(s);
 		} 

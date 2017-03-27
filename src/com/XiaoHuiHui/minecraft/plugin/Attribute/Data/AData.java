@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -92,6 +93,11 @@ public class AData {
 	
 	//ui配置
 	private boolean warn;
+	
+	//attrs
+	private Map<String,AAttr> unNames;
+	private Map<AAttr,String> names;
+	private Map<AAttr,Integer> maxLevels;
 	
 	//getter and setter
 	public List<Inventory> getInvs(){
@@ -279,6 +285,45 @@ public class AData {
 		return dataConfig;
 	}
 	
+	private Map<AAttr,String> getNames(){
+		return names;
+	}
+	
+	private void setNames(Map<AAttr,String> names){
+		this.names=names;
+	}
+	
+	private Map<AAttr,Integer> getMaxLevels(){
+		return maxLevels;
+	}
+	
+	private void setMaxLevels(Map<AAttr,Integer> maxLevels){
+		this.maxLevels=maxLevels;
+	}
+	
+	private Map<String,AAttr> getUnNames(){
+		return unNames;
+	}
+	
+	private void setUnNames(Map<String,AAttr> unNames){
+		this.unNames=unNames;
+	}
+	
+	//获取一个名称对应的属性
+	public AAttr getAttr(String name){
+		return getUnNames().get(name);
+	}
+	
+	//获取一个属性的名称
+	public String getName(AAttr attr){
+		return getNames().get(attr);
+	}
+	
+	//获取一个属性的最大等级
+	public int getMaxLevel(AAttr attr){
+		return getMaxLevels().get(attr);
+	}
+	
 	//获取一个玩家的所有属性
 	private Map<AAttr,Integer> getAttrsFromPlayer(String name){
 		if(name==null)
@@ -305,8 +350,53 @@ public class AData {
 		if(it==null){
 			return 0;
 		}
+		it+=getTempData(name,attr);
 		return it;
 	}
+	
+	//获取一个玩家的指定属性在物品上的叠加
+	@SuppressWarnings("deprecation")
+	private int getTempData(String name,AAttr attr){
+		return getTempData(getMain().getServer().getPlayer(name),attr);
+	}
+	
+	//获取一个玩家的指定属性在物品上的叠加
+	private int getTempData(Player p,AAttr attr){
+		if(p==null){
+			return 0;
+		}
+		PlayerInventory inv=p.getInventory();
+		List<ItemStack> list=new ArrayList<ItemStack>();
+		list.addAll(Arrays.asList(inv.getArmorContents()));
+		list.add(inv.getItemInHand());
+		int cnt=0;
+		for(int i=0;i<list.size();++i){
+			ItemStack item=list.get(i);
+			List<String> lores=item.getItemMeta().getLore();
+			for(String s:lores){
+				if(!s.contains(":")){
+					continue;
+				}
+				String str[]=s.split(":");
+				if(str.length!=2){
+					continue;
+				}
+				AAttr attr1=getAttr(str[0]);
+				if(attr1==null || !attr.equals(attr1)){
+					continue;
+				}
+				int temp;
+				try{
+					temp=Integer.parseInt(str[1]);
+				}catch(NumberFormatException e){
+					continue;
+				}
+				cnt+=temp;
+			}
+		}
+		return cnt;
+	}
+	
 	
 	//设置一个玩家的指定属性
 	public void setAttrsFromPlayer(String name,AAttr attr,int value){
@@ -341,7 +431,6 @@ public class AData {
 			throw new IllegalArgumentException("player cannot be null!");
 		setAttrsFromPlayer(player.getName(),attr,value);
 	}
-	
 	
     private void reloadConfig() {
     	dataConfig=reloadConfig("data/attr.yml",dataFile);
@@ -399,6 +488,7 @@ public class AData {
 		getItemsData();
 		getGUIData();
 		getUIData();
+		getAttrsData();
 	}
 	
 	//读取GUI数据
@@ -445,18 +535,19 @@ public class AData {
 		setItems(temp);
 	}
 	
-	public int getTempData(Player p,AAttr attr){
-		PlayerInventory inv=p.getInventory();
-		Iterator<ItemStack> it=inv.iterator();
-		while(it.hasNext()){
-			ItemStack item=it.next();
-			List<String> lores=item.getItemMeta().getLore();
-			for(String s:lores){
-				s.getClass();
-				//TODO:Lore
-			}
+	//读取attrs设置数据
+	private void getAttrsData(){
+		setNames(new HashMap<AAttr,String>());
+		setUnNames(new HashMap<String,AAttr>());
+		setMaxLevels(new HashMap<AAttr,Integer>());
+		AAttr attrs[]=AAttr.values();
+		for(AAttr attr:attrs){
+			String name=getConfig().getString("more."+attr.name()+".name");
+			int maxLevel=getConfig().getInt("more."+attr.name()+".maxlevel");
+			getNames().put(attr,name);
+			getUnNames().put(name,attr);
+			getMaxLevels().put(attr,maxLevel);
 		}
-		return 0;
 	}
 	
 	//检查配置文件的版本
@@ -504,19 +595,23 @@ public class AData {
 		//TODO:
 	}
 	
+	//输出错误
 	public void outputError(String msg){
 		getMain().getLogger().log(Level.SEVERE, msg);
 		getMain().setError(true);
 	}
 	
+	//输出错误
 	public void outputWarning(String msg){
 		getMain().getLogger().log(Level.WARNING, msg);
 	}
 	
+	//输出错误
 	public void outputInfo(String msg){
 		getMain().getLogger().info(msg);
 	}
 	
+	//写入config.yml
 	public boolean fresh(){
 		getConfig().set("ui.warn", isWarn());
 		try {

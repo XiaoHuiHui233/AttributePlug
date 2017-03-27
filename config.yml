@@ -60,3 +60,9 @@ more:
     EX_HEAL:
       name: '额外生命恢复'
       maxlevel: 1000
+    HEALTH:
+      name: '生命加成'
+      maxlevel: 1000
+    BRAMBLES:
+      name: '荆棘'
+      maxlevel: 1000

@@ -3,6 +3,7 @@ package com.XiaoHuiHui.minecraft.plugin.Attribute.Listener;
 import java.util.Random;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -11,6 +12,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AAttr;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AData;
@@ -51,6 +55,16 @@ public class AListener implements Listener {
 		event.setDamage(damage);
 	}
 	
+	private void scaleHealth(HumanEntity p) {
+		double temp=p.getMaxHealth();
+		double add=getData().getAttr(p.getName(), AAttr.HEALTH);
+		add/=100;
+		add+=1;
+		temp*=add;
+		p.setMaxHealth(temp);
+		
+	}
+	
 	//攻击加成
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onDamagedAttack(EntityDamageByEntityEvent event){
@@ -79,6 +93,7 @@ public class AListener implements Listener {
 			return;
 		}
 		double damage=event.getFinalDamage();
+		add/=100;
 		damage*=add;
 		double heal=p.getHealth();
 		//TODO:来个GUI看看
@@ -86,6 +101,26 @@ public class AListener implements Listener {
 		if(getData().isWarn()){
 			p.sendMessage("&a*你触发了嗜血*");
 		}
+	}
+	
+	//荆棘
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onDamagedBrambles(EntityDamageByEntityEvent event){
+		Entity damager=event.getEntity();
+		if(isPlayer(event,damager)){
+			return;
+		}
+		Player p=(Player)damager;
+		Entity causer=event.getDamager();
+		if(!(causer instanceof LivingEntity)){
+			return;
+		}
+		LivingEntity le=(LivingEntity)causer;
+		double add=getData().getAttr(p,AAttr.BRAMBLES);
+		add/=100;
+		double damage=event.getFinalDamage();
+		damage*=add;
+		le.damage(damage);
 	}
 	
 	//闪避
@@ -195,5 +230,24 @@ public class AListener implements Listener {
 		event.setAmount(heal);
 	}
 	
-	//TODO:Lore
+	//生命加成
+	@EventHandler(ignoreCancelled=true)
+	public void onLogin(PlayerJoinEvent event){
+		Player p=event.getPlayer();
+		scaleHealth(p);
+	}
+
+	//生命加成
+	@EventHandler(ignoreCancelled=true)
+	public void onLogin(PlayerItemHeldEvent event){
+		Player p=event.getPlayer();
+		scaleHealth(p);
+	}
+	
+	//生命加成
+	@EventHandler(ignoreCancelled=true)
+	public void onLogin(InventoryCloseEvent event){
+		HumanEntity p=event.getPlayer();
+		scaleHealth(p);
+	}
 }
