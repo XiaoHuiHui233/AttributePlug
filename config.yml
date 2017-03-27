@@ -12,6 +12,9 @@ database:
   password: ''
 ui:
   warn: true
+test:
+  useleveluphealthchange: false
+  debug: false
 count: 1
 list:
   1:
@@ -33,36 +36,48 @@ more:
     ATTACK:
       name: '攻击加成'
       maxlevel: 1000
+      default: 0
     DEFENSE:
       name: '防御'
       maxlevel: 1000
+      default: 10
     CRIT:
       name: '暴击几率'
       maxlevel: 1000
+      default: 10
     CRIT_DMG:
       name: '暴击伤害'
       maxlevel: 1000
+      default: 50
     DODGE:
       name: '闪避'
       maxlevel: 1000
+      default: 5
     BLOOD_DRINK:
       name: '嗜血几率'
       maxlevel: 1000
+      default: 0
     BLOOD_DRINK_DMG:
       name: '嗜血量'
       maxlevel: 1000
+      default: 5
     PLAYER_DAMAGED:
       name: '对玩家伤害加成'
       maxlevel: 1000
+      default: 0
     ENTITY_DAMAGED:
       name: '对怪物伤害加成'
       maxlevel: 1000
+      default: 0
     EX_HEAL:
       name: '额外生命恢复'
       maxlevel: 1000
+      default: 10
     HEALTH:
       name: '生命加成'
       maxlevel: 1000
+      default: 10
     BRAMBLES:
       name: '荆棘'
       maxlevel: 1000
+      default: 5

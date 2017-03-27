@@ -109,7 +109,7 @@ public class AGUIListener implements Listener{
 				}
 				int r=rand.nextInt(12);
 				AAttr[] attrs=AAttr.values();
-				getData().setAttrsFromPlayer(p, attrs[r], ta.getStrong()*amount);
+				getData().setAttrFromPlayer(p, attrs[r], ta.getStrong()*amount);
 				p.sendMessage("§3升级成功！您的 §2"+getData().getName(attrs[r])
 							+" §3属性已升级到 §1"+getData().getAttr(p, attrs[r])+" §3%");
 			}

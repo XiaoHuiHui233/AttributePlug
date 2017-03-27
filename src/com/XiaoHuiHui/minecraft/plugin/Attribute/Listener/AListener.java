@@ -1,5 +1,7 @@
 package com.XiaoHuiHui.minecraft.plugin.Attribute.Listener;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.entity.Entity;
@@ -15,6 +17,8 @@ import org.bukkit.event.entity.EntityRegainHealthEvent.RegainReason;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLevelChangeEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AAttr;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AData;
@@ -22,6 +26,8 @@ import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AData;
 public class AListener implements Listener {
 	private AData data;
 	//AMain main;
+	
+	private Map<Player,Double> records=new HashMap<Player,Double>();
 
 	//Constructor
 	public AListener(){
@@ -55,14 +61,15 @@ public class AListener implements Listener {
 		event.setDamage(damage);
 	}
 	
-	private void scaleHealth(HumanEntity p) {
-		double temp=p.getMaxHealth();
+	private void scaleHealth(HumanEntity p,double temp) {
 		double add=getData().getAttr(p.getName(), AAttr.HEALTH);
+		if(add>getData().getMaxLevel(AAttr.HEALTH)){
+			add=getData().getMaxLevel(AAttr.HEALTH);
+		}
 		add/=100;
 		add+=1;
 		temp*=add;
 		p.setMaxHealth(temp);
-		
 	}
 	
 	//攻击加成
@@ -74,6 +81,9 @@ public class AListener implements Listener {
 		}
 		Player p=(Player)damager;
 		double add=getData().getAttr(p, AAttr.ATTACK);
+		if(add>getData().getMaxLevel(AAttr.ATTACK)){
+			add=getData().getMaxLevel(AAttr.ATTACK);
+		}
 		damageAdd(event, add);
 	}
 	
@@ -86,7 +96,13 @@ public class AListener implements Listener {
 		}
 		Player p=(Player)damager;
 		int prop=getData().getAttr(p, AAttr.BLOOD_DRINK);
+		if(prop>getData().getMaxLevel(AAttr.BLOOD_DRINK)){
+			prop=getData().getMaxLevel(AAttr.BLOOD_DRINK);
+		}
 		double add=getData().getAttr(p, AAttr.BLOOD_DRINK_DMG);
+		if(add>getData().getMaxLevel(AAttr.BLOOD_DRINK_DMG)){
+			add=getData().getMaxLevel(AAttr.BLOOD_DRINK_DMG);
+		}
 		Random rand=new Random(System.currentTimeMillis());
 		int pro=rand.nextInt(100);
 		if(pro>prop){
@@ -117,6 +133,9 @@ public class AListener implements Listener {
 		}
 		LivingEntity le=(LivingEntity)causer;
 		double add=getData().getAttr(p,AAttr.BRAMBLES);
+		if(add>getData().getMaxLevel(AAttr.BRAMBLES)){
+			add=getData().getMaxLevel(AAttr.BRAMBLES);
+		}
 		add/=100;
 		double damage=event.getFinalDamage();
 		damage*=add;
@@ -133,6 +152,9 @@ public class AListener implements Listener {
 		}
 		Player p1=(Player)damager;
 		int dodge=getData().getAttr(p1, AAttr.DODGE);
+		if(dodge>getData().getMaxLevel(AAttr.DODGE)){
+			dodge=getData().getMaxLevel(AAttr.DODGE);
+		}
 		Random rand=new Random(System.currentTimeMillis());
 		int pro=rand.nextInt(100);
 		if(pro>dodge){
@@ -164,7 +186,13 @@ public class AListener implements Listener {
 		}
 		Player p=(Player)damager;
 		int prop=getData().getAttr(p, AAttr.CRIT);
+		if(prop>getData().getMaxLevel(AAttr.CRIT)){
+			prop=getData().getMaxLevel(AAttr.CRIT);
+		}
 		double add=getData().getAttr(p, AAttr.CRIT_DMG);
+		if(add>getData().getMaxLevel(AAttr.CRIT_DMG)){
+			add=getData().getMaxLevel(AAttr.CRIT_DMG);
+		}
 		Random rand=new Random(System.currentTimeMillis());
 		int pro=rand.nextInt(100);
 		if(pro>prop){
@@ -191,8 +219,14 @@ public class AListener implements Listener {
 		double add;
 		if(damager instanceof Player){
 			add=getData().getAttr(p1, AAttr.PLAYER_DAMAGED);
+			if(add>getData().getMaxLevel(AAttr.PLAYER_DAMAGED)){
+				add=getData().getMaxLevel(AAttr.PLAYER_DAMAGED);
+			}
 		}else{
 			add=getData().getAttr(p1, AAttr.ENTITY_DAMAGED);
+			if(add>getData().getMaxLevel(AAttr.ENTITY_DAMAGED)){
+				add=getData().getMaxLevel(AAttr.ENTITY_DAMAGED);
+			}
 		}
 		damageAdd(event,add);
 	}
@@ -206,6 +240,9 @@ public class AListener implements Listener {
 		}
 		Player p=(Player)damager;
 		int def=getData().getAttr(p, AAttr.DEFENSE);
+		if(def>getData().getMaxLevel(AAttr.DEFENSE)){
+			def=getData().getMaxLevel(AAttr.DEFENSE);
+		}
 		double damage=event.getDamage();
 		damage-=def;
 		event.setDamage(damage);
@@ -223,6 +260,9 @@ public class AListener implements Listener {
 		if(!(event.getRegainReason().equals(RegainReason.SATIATED)))
 			return;
 		double add=getData().getAttr(player, AAttr.EX_HEAL);
+		if(add>getData().getMaxLevel(AAttr.EX_HEAL)){
+			add=getData().getMaxLevel(AAttr.EX_HEAL);
+		}
 		add/=100;
 		add+=1;
 		double heal=event.getAmount();
@@ -234,20 +274,43 @@ public class AListener implements Listener {
 	@EventHandler(ignoreCancelled=true)
 	public void onLogin(PlayerJoinEvent event){
 		Player p=event.getPlayer();
-		scaleHealth(p);
-	}
-
-	//生命加成
-	@EventHandler(ignoreCancelled=true)
-	public void onLogin(PlayerItemHeldEvent event){
-		Player p=event.getPlayer();
-		scaleHealth(p);
+		double temp=p.getMaxHealth();
+		records.put(p,temp);
+		scaleHealth(p,temp);
 	}
 	
 	//生命加成
 	@EventHandler(ignoreCancelled=true)
-	public void onLogin(InventoryCloseEvent event){
+	public void onLevelUp(PlayerLevelChangeEvent event){
+		if(!getData().isUseLevelChangeHealth()){
+			return;
+		}
+		Player p=event.getPlayer();
+		double temp=p.getMaxHealth();
+		records.put(p, temp);
+		scaleHealth(p,temp);
+	}
+
+	//生命加成
+	@EventHandler(ignoreCancelled=true)
+	public void onItemHeld(PlayerItemHeldEvent event){
+		Player p=event.getPlayer();
+		double temp=records.get(p);
+		scaleHealth(p,temp);
+	}
+	
+	//生命加成
+	@EventHandler(ignoreCancelled=true)
+	public void onInventoryClose(InventoryCloseEvent event){
 		HumanEntity p=event.getPlayer();
-		scaleHealth(p);
+		double temp=records.get(p);
+		scaleHealth(p,temp);
+	}
+	
+	//生命加成
+	@EventHandler(ignoreCancelled=true)
+	public void onPlayerLeave(PlayerQuitEvent event){
+		HumanEntity p=event.getPlayer();
+		records.remove(p);
 	}
 }

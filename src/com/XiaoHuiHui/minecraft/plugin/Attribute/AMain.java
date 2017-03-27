@@ -26,7 +26,7 @@ public class AMain extends JavaPlugin{
 	
 	private boolean isError=false;
 	
-	public static final String version="v00.00.33 beta";
+	public static final String version="v00.00.53 beta";
 
 	//getter and setter
 	public AGUIListener getGuiListener() {
@@ -72,7 +72,6 @@ public class AMain extends JavaPlugin{
 	@Override
 	public void onEnable(){
 		AData.init(this);
-		ADatabase.init();
 		AEco.init(this);
 		AGUI.init();
 		setData(AData.getInstance());

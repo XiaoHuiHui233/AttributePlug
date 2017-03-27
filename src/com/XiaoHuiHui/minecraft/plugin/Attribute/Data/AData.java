@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -94,10 +93,15 @@ public class AData {
 	//ui配置
 	private boolean warn;
 	
+	//test配置
+	private boolean useLevelChangeHealth;
+	private boolean debug;//TODO:Debug
+	
 	//attrs
 	private Map<String,AAttr> unNames;
 	private Map<AAttr,String> names;
 	private Map<AAttr,Integer> maxLevels;
+	private Map<AAttr,Integer> defaults;
 	
 	//getter and setter
 	public List<Inventory> getInvs(){
@@ -246,6 +250,22 @@ public class AData {
 	public void setWarn(boolean warn) {
 		this.warn = warn;
 	}
+	
+	public boolean isUseLevelChangeHealth() {
+		return useLevelChangeHealth;
+	}
+
+	private void setUseLevelChangeHealth(boolean useLevelChangeHealth) {
+		this.useLevelChangeHealth = useLevelChangeHealth;
+	}
+
+	public boolean isDebug() {
+		return debug;
+	}
+
+	private void setDebug(boolean debug) {
+		this.debug = debug;
+	}
 
 	private Map<String,Map<AAttr,Integer>> getPlayerData(){
 		return playerData;
@@ -309,6 +329,15 @@ public class AData {
 		this.unNames=unNames;
 	}
 	
+	
+	private Map<AAttr, Integer> getDefaults() {
+		return defaults;
+	}
+
+	private void setDefaults(Map<AAttr, Integer> defaults) {
+		this.defaults = defaults;
+	}
+
 	//获取一个名称对应的属性
 	public AAttr getAttr(String name){
 		return getUnNames().get(name);
@@ -322,6 +351,11 @@ public class AData {
 	//获取一个属性的最大等级
 	public int getMaxLevel(AAttr attr){
 		return getMaxLevels().get(attr);
+	}
+	
+	//获取一个属性的初始默认值
+	public int getDefault(AAttr attr){
+		return getDefaults().get(attr);
 	}
 	
 	//获取一个玩家的所有属性
@@ -369,6 +403,9 @@ public class AData {
 		List<ItemStack> list=new ArrayList<ItemStack>();
 		list.addAll(Arrays.asList(inv.getArmorContents()));
 		list.add(inv.getItemInHand());
+		list.add(inv.getItem(6));
+		list.add(inv.getItem(7));
+		list.add(inv.getItem(8));
 		int cnt=0;
 		for(int i=0;i<list.size();++i){
 			ItemStack item=list.get(i);
@@ -399,7 +436,7 @@ public class AData {
 	
 	
 	//设置一个玩家的指定属性
-	public void setAttrsFromPlayer(String name,AAttr attr,int value){
+	public void setAttrFromPlayer(String name,AAttr attr,int value){
 		if(name==null)
 			throw new IllegalArgumentException("name cannot be null!");
 		Map<AAttr,Integer> map=getAttrsFromPlayer(name);
@@ -407,9 +444,15 @@ public class AData {
 		if(map==null){
 			flag=true;
 			map=new HashMap<AAttr,Integer>();
+			AAttr attrs[]=AAttr.values();
+			for(AAttr ta : attrs){
+				map.put(ta,getDefault(ta));
+			}
+			map.put(attr, map.get(attr)+value);
 			getPlayerData().put(name,map);
+		}else{
+			map.put(attr, map.get(attr)+value);
 		}
-		map.put(attr, map.get(attr)+value);
 		if(isDatabaseEnable()){
 			//TODO：数据库写入！
 		}else{
@@ -426,10 +469,10 @@ public class AData {
 	}
 	
 	//设置一个玩家的指定属性
-	public void setAttrsFromPlayer(OfflinePlayer player,AAttr attr,int value){
+	public void setAttrFromPlayer(OfflinePlayer player,AAttr attr,int value){
 		if(player==null)
 			throw new IllegalArgumentException("player cannot be null!");
-		setAttrsFromPlayer(player.getName(),attr,value);
+		setAttrFromPlayer(player.getName(),attr,value);
 	}
 	
     private void reloadConfig() {
@@ -476,6 +519,7 @@ public class AData {
 		saveDefaultConfig();
 		reloadConfig();
 		updateVersion();
+		getTestData();
 		getDatabaseData();
 		//选择读取Attr信息
 		if(isDatabaseEnable()){
@@ -505,6 +549,11 @@ public class AData {
 		setWarn(getConfig().getBoolean("ui.warn"));
 	}
 	
+	private void getTestData(){
+		setUseLevelChangeHealth(getConfig().getBoolean("test.useleveluphealthchange"));
+		setDebug(getConfig().getBoolean("test.debug"));
+	}
+	
 	//读取数据库数据
 	private void getDatabaseData() {
 		setDatabaseEnable(getConfig().getBoolean("database.enable"));
@@ -513,6 +562,7 @@ public class AData {
 		setUsername(getConfig().getString("database.username"));
 		setPassword(getConfig().getString("database.password"));
 		if(isDatabaseEnable()){
+			ADatabase.init();
 			ADatabase.load();
 		}
 	}
@@ -540,13 +590,16 @@ public class AData {
 		setNames(new HashMap<AAttr,String>());
 		setUnNames(new HashMap<String,AAttr>());
 		setMaxLevels(new HashMap<AAttr,Integer>());
+		setDefaults(new HashMap<AAttr,Integer>());
 		AAttr attrs[]=AAttr.values();
 		for(AAttr attr:attrs){
 			String name=getConfig().getString("more."+attr.name()+".name");
 			int maxLevel=getConfig().getInt("more."+attr.name()+".maxlevel");
+			int defaultValue=getConfig().getInt("more."+attr.name()+".default");
 			getNames().put(attr,name);
 			getUnNames().put(name,attr);
 			getMaxLevels().put(attr,maxLevel);
+			getDefaults().put(attr,defaultValue);
 		}
 	}
 	
@@ -591,8 +644,7 @@ public class AData {
 	
 	//读取数据库
 	private void loadDatabaseAttr(){
-		//ADatabase.getData("");
-		//TODO:
+		//TODO:读取数据库啊！！
 	}
 	
 	//输出错误
