@@ -84,6 +84,10 @@ public class AGUIListener implements Listener{
 	@SuppressWarnings("deprecation")
 	private void update(Inventory inv,Player p) {
 		ItemStack item1=inv.getItem(10);
+		if(item1==null || item1.getType().equals(Material.AIR)){
+			p.sendMessage("§4你没有放入需要的物品！");
+			return;
+		}
 		int amount=item1.getAmount();
 		ItemMeta itemm=item1.getItemMeta();
 		AItem aitem=new AItem(itemm.getDisplayName(),
@@ -99,6 +103,7 @@ public class AGUIListener implements Listener{
 				boolean flag=AEco.removeEcoFromPlayer(p.getName(), money);
 				if(!flag){
 					p.sendMessage("§4你没有足够的金钱！");
+					p.getInventory().addItem(inv.getItem(10));
 					return;
 				}
 				Random rand=new Random(System.currentTimeMillis());

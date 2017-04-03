@@ -1,10 +1,14 @@
 package com.XiaoHuiHui.minecraft.plugin.Attribute.Command;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AAttr;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AData;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Data.AItem;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.GUI.AGUI;
@@ -42,7 +46,14 @@ public class ACmd implements CommandExecutor {
 			sender.sendMessage("§4Only player can do this command!");
 			return;
 		}
-		//TODO:如何去check呢？我还是先想想如何存储吧
+		Player p=(Player)sender;
+		List<String> str=new ArrayList<String>();
+		str.add("§3你的属性如下：");
+		AAttr attrs[]=AAttr.values();
+		for(int i=0;i<attrs.length;++i){
+			str.add("  "+getData().getName(attrs[i])+"§2: §6"+getData().getAttr(p, attrs[i]));
+		}
+		sender.sendMessage(str.toArray(new String[str.size()]));
 	}
 	
 	private void open(CommandSender sender) {
@@ -52,7 +63,6 @@ public class ACmd implements CommandExecutor {
 		}
 		Player p=(Player)sender;
 		AGUI.openUI(p);
-		//TODO:temp
 	}
 	
 
@@ -79,6 +89,14 @@ public class ACmd implements CommandExecutor {
 	}
 	
 	private void give(CommandSender sender) {
+		if(!getData().isDebug()){
+			sender.sendMessage("§4This command only works on DEBUG_MODE!");
+			return;
+		}
+		if(!(sender.isOp()||sender.hasPermission("Attribute.reload"))){
+			sender.sendMessage("§4You don't have premission to do this!");
+			return;
+		}
 		if(!(sender instanceof Player)){
 			sender.sendMessage("§4Only player can do this command!");
 			return;
@@ -88,6 +106,23 @@ public class ACmd implements CommandExecutor {
 				p.getInventory().addItem(aitem.toItem());
 		}
 		
+	}
+	
+	private void clear(CommandSender sender){
+		if(!getData().isDebug()){
+			sender.sendMessage("§4This command only works on DEBUG_MODE!");
+			return;
+		}
+		if(!(sender.isOp()||sender.hasPermission("Attribute.reload"))){
+			sender.sendMessage("§4You don't have premission to do this!");
+			return;
+		}
+		if(!(sender instanceof Player)){
+			sender.sendMessage("§4Only player can do this command!");
+			return;
+		}
+		Player p=(Player)sender;
+		p.setMaxHealth(20);
 	}
 	
 	@Override
@@ -107,6 +142,8 @@ public class ACmd implements CommandExecutor {
 			}else if(args[0].equalsIgnoreCase("give")){
 				give(sender);
 				return true;
+			}else if(args[0].equalsIgnoreCase("clear")){
+				clear(sender);
 			}
 		}else if(args.length==2){
 			if(args[0].equalsIgnoreCase("setwarn")){

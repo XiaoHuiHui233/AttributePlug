@@ -12,6 +12,10 @@ database:
   password: ''
 ui:
   warn: true
+  bdmsg: '&a*你触发了嗜血 吸取 &3%VALUE%&a的伤害*'
+  cmsg: '&a*你触发了暴击 造成 &3%VALUE%&a的伤害*'
+  hmmsg: '&3%PLAYERNAME%&aMISS&2了你的攻击！'
+  mmsg: '&2你&aMISS&2了来自&3%PLAYERNAME%&2的攻击!'
 test:
   useleveluphealthchange: false
   debug: false
@@ -34,50 +38,50 @@ list:
     money: 100
 more:
     ATTACK:
-      name: '攻击加成'
+      name: '&a攻击加成'
       maxlevel: 1000
       default: 0
     DEFENSE:
-      name: '防御'
+      name: '&a防御'
       maxlevel: 1000
-      default: 10
+      default: 0
     CRIT:
-      name: '暴击几率'
+      name: '&a暴击几率'
       maxlevel: 1000
       default: 10
     CRIT_DMG:
-      name: '暴击伤害'
+      name: '&a暴击伤害'
       maxlevel: 1000
       default: 50
     DODGE:
-      name: '闪避'
+      name: '&a闪避'
       maxlevel: 1000
       default: 5
     BLOOD_DRINK:
-      name: '嗜血几率'
+      name: '&a嗜血几率'
       maxlevel: 1000
       default: 0
     BLOOD_DRINK_DMG:
-      name: '嗜血量'
+      name: '&a嗜血量'
       maxlevel: 1000
       default: 5
     PLAYER_DAMAGED:
-      name: '对玩家伤害加成'
+      name: '&a对玩家伤害加成'
       maxlevel: 1000
       default: 0
     ENTITY_DAMAGED:
-      name: '对怪物伤害加成'
+      name: '&a对怪物伤害加成'
       maxlevel: 1000
       default: 0
     EX_HEAL:
-      name: '额外生命恢复'
+      name: '&a额外生命恢复'
       maxlevel: 1000
       default: 10
     HEALTH:
-      name: '生命加成'
+      name: '&a生命加成'
       maxlevel: 1000
       default: 10
     BRAMBLES:
-      name: '荆棘'
+      name: '&a荆棘'
       maxlevel: 1000
       default: 5

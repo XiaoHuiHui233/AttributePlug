@@ -2,11 +2,14 @@ package com.XiaoHuiHui.minecraft.plugin.Attribute.Data;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 //import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 //import java.util.ArrayList;
 //import java.util.List;
+import java.util.List;
 
 public class ADatabase {
 	private ADatabase(){
@@ -101,6 +104,7 @@ public class ADatabase {
 		setPassword(getData().getPassword());
 		String url="jdbc:mysql://"+getHost()+":"+getPort()
 					+"/attribute?useSSL=true&useUnicode=true&characterEncoding=UTF8";
+		getData().outputDebug(url);
 		try {
 			setConn(DriverManager.getConnection(url,getUsername(),getPassword()));
 			setStmt(getConn().createStatement());
@@ -112,23 +116,40 @@ public class ADatabase {
 		getData().outputInfo("数据库加载成功！");
 	}
 	
-	public static boolean createTable(String name){
+	public static boolean createTable(){
 		if(!isInit){
 			throw new AssertionError();
 		}
-		String str="CREATE TABLE IF NOT EXISTS \'"+name+"\' (";
+		String str="create table if not exists players(name VARCHAR(255) primary key,";
 		AAttr aa[]=AAttr.values();
 		for(int i=0;i<aa.length;++i){
 			str+=aa[i].name();
-			str+=" INT(10) DEFAULT 0";
+			str+=" INT(10)";
 			if(i==aa.length-1){
 				str+=")";
 			}else{
 				str+=",";
 			}
 		}
+		getData().outputDebug(str);
 		try {
-			getStmt().executeQuery(str);
+			getStmt().execute(str);
+		} catch (SQLException e) {
+			getData().outputError("数据库操作异常！");
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean insertData(String name){
+		if(!isInit){
+			throw new AssertionError();
+		}
+		String str="insert into players set name=\'"+name+"\'";
+		getData().outputDebug(str);
+		try {
+			getStmt().execute(str);
 		} catch (SQLException e) {
 			getData().outputError("数据库操作异常！");
 			e.printStackTrace();
@@ -141,17 +162,59 @@ public class ADatabase {
 		if(!isInit){
 			throw new AssertionError();
 		}
-		boolean flag=createTable(name);
-		if(!flag)return false;
-		String str="UPDATE \'"+name+"\' SET "+attr.name()+"="+value;
+		String str="update players set "+attr.name()+"="+value+" where name=\'"+name+"\'";
+		getData().outputDebug(str);
 		try {
-			getStmt().executeQuery(str);
+			getStmt().execute(str);
 		} catch (SQLException e) {
 			getData().outputError("数据库操作异常！");
 			e.printStackTrace();
 			return false;
 		}
 		return true;
+	}
+	
+	public static int getPlayerAttr(String name,AAttr attr){
+		if(!isInit){
+			throw new AssertionError();
+		}
+		String str="select "+attr.name()+" from players where name=\'"+name+"\'";
+		getData().outputDebug(str);
+		try {
+			ResultSet r=getStmt().executeQuery(str);
+			int temp=0;
+			if(r.next())
+				temp=r.getInt(1);
+			r.close();
+			return temp;
+		} catch (SQLException e) {
+			getData().outputError("数据库操作异常！");
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	public static List<String> getPlayerList(){
+		if(!isInit){
+			throw new AssertionError();
+		}
+		String str="select name from players";
+		getData().outputDebug(str);
+		List<String> list=new ArrayList<String>();
+		try {
+			ResultSet r=getStmt().executeQuery(str);
+			int i=1;
+			while(r.next()){
+				list.add(r.getString(i));
+				++i;
+			}
+			r.close();
+		} catch (SQLException e) {
+			getData().outputError("数据库操作异常！");
+			e.printStackTrace();
+			return list;
+		}
+		return list;
 	}
 	
 	public static void shutdown(){
@@ -166,20 +229,4 @@ public class ADatabase {
 			e.printStackTrace();
 		}
 	}
-	
-//	public static int getData(String name){
-//		if(!isInit){
-//			throw new AssertionError();
-//		}
-//		String str="SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'attribute'";
-//		List<String> list=new ArrayList<String>();
-//		try {//TODO
-//			ResultSet rs = getStmt().executeQuery(str);
-//		} catch (SQLException e) {
-//			getData().outputError("数据库操作异常！");
-//			e.printStackTrace();
-//			return 0;
-//		}
-//		return 0;
-//	}
 }

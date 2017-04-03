@@ -12,23 +12,34 @@ import com.XiaoHuiHui.minecraft.plugin.Attribute.Economy.AEco;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.GUI.AGUI;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Listener.AGUIListener;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.Listener.AListener;
+import com.XiaoHuiHui.minecraft.plugin.Attribute.Listener.AAttrListener;
 
 //Attribute属性插件主类
 public class AMain extends JavaPlugin{
-	//事件监听器
-	AListener listener;
+	//数据服务的监听器
+	private AListener listener;
+	//属性模块的监听器
+	private AAttrListener attrListener;
 	//传递给监听器的数据
-	AData data;
+	private AData data;
 	//命令处理类
-	ACmd cmd;
-	//版本号
-	AGUIListener guiListener;
-	
+	private ACmd cmd;
+	//GUI模块的监听器
+	private AGUIListener guiListener;
+	//错误记录
 	private boolean isError=false;
-	
-	public static final String version="v00.00.53 beta";
+	//版本号
+	public static final String version="v00.00.74 beta";
 
 	//getter and setter
+	public AListener getListener(){
+		return listener;
+	}
+	
+	private void setListener(AListener listener) {
+		this.listener = listener;
+	}
+	
 	public AGUIListener getGuiListener() {
 		return guiListener;
 	}
@@ -37,12 +48,12 @@ public class AMain extends JavaPlugin{
 		this.guiListener = guiListener;
 	}
 	
-	public AListener getListener() {
-		return listener;
+	public AAttrListener getAttrListener() {
+		return attrListener;
 	}
 
-	private void setListener(AListener listener) {
-		this.listener = listener;
+	private void setAttrListener(AAttrListener attrListener) {
+		this.attrListener = attrListener;
 	}
 
 	public AData getData() {
@@ -76,12 +87,14 @@ public class AMain extends JavaPlugin{
 		AGUI.init();
 		setData(AData.getInstance());
 		setListener(new AListener());
+		setAttrListener(new AAttrListener());
 		setCmd(new ACmd());
 		setGuiListener(new AGUIListener());
 		if (!getDataFolder().exists()) {
 			getDataFolder().mkdir();
 		}
 		getServer().getPluginManager().registerEvents(getListener(), this);
+		getServer().getPluginManager().registerEvents(getAttrListener(), this);
 		getServer().getPluginManager().registerEvents(getGuiListener(), this);
 		getServer().getPluginCommand("attribute").setExecutor(getCmd());
 		getData().load();

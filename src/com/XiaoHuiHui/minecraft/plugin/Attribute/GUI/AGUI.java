@@ -83,7 +83,7 @@ public class AGUI {
 		if(!isInit){
 			throw new AssertionError();
 		}
-		Inventory inv=Bukkit.createInventory(null, InventoryType.CHEST, getTitleGUI());
+		Inventory inv=Bukkit.createInventory(player, InventoryType.CHEST, getTitleGUI());
 		List<String> lores=new ArrayList<String>();
 		lores.add(getLine());
 		lores.add("                          ");
@@ -97,7 +97,9 @@ public class AGUI {
 		} 
 		lores.add("                          ");
 		lores.add(getLine());
-		putItem(Material.STAINED_GLASS_PANE,(short)5,getName(),lores,inv,0);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,getName(),lores,inv,26);
+		putItem(Material.STAINED_GLASS_PANE,(short)5,
+				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,0);
 		putItem(Material.STAINED_GLASS_PANE,(short)14,
 				"§2请将属性强化宝石放到中间!",new ArrayList<String>(),inv,1);
 		putItem(Material.STAINED_GLASS_PANE,(short)5,
@@ -118,7 +120,8 @@ public class AGUI {
 		player.openInventory(inv);
 	}
 	
-	private static void putItem(Material m,short d,String n,List<String> lore,Inventory inv,int l){
+	private static void putItem(Material m,short d,String n,
+			List<String> lore,Inventory inv,int l){
 		ItemStack item=new ItemStack(m,1,d);
 		ItemMeta itemm=item.getItemMeta();
 		itemm.setLore(lore);

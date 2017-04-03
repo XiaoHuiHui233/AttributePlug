@@ -1,6 +1,6 @@
 name: Attribute
 main: com.XiaoHuiHui.minecraft.plugin.Attribute.AMain
-version: '00.00.53 beta'
+version: '00.00.74 beta'
 author: XiaoHuiHui
 depend: [Vault]
 commands:

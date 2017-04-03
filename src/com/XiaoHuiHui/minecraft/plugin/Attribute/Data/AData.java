@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import com.XiaoHuiHui.minecraft.plugin.Attribute.AMain;
 import com.XiaoHuiHui.minecraft.plugin.Attribute.GUI.AGUI;
@@ -92,6 +94,10 @@ public class AData {
 	
 	//ui配置
 	private boolean warn;
+	private String cmsg;
+	private String bdmsg;
+	private String hmmsg;
+	private String mmsg;
 	
 	//test配置
 	private boolean useLevelChangeHealth;
@@ -251,6 +257,38 @@ public class AData {
 		this.warn = warn;
 	}
 	
+	public String getCmsg() {
+		return cmsg;
+	}
+
+	private void setCmsg(String cmsg) {
+		this.cmsg = cmsg.replace('&', '§');
+	}
+
+	public String getBdmsg() {
+		return bdmsg;
+	}
+
+	private void setBdmsg(String bdmsg) {
+		this.bdmsg = bdmsg.replace('&', '§');
+	}
+	
+	public String getHmmsg() {
+		return hmmsg;
+	}
+
+	private void setHmmsg(String hmmsg) {
+		this.hmmsg = hmmsg.replace('&', '§');
+	}
+
+	public String getMmsg() {
+		return mmsg;
+	}
+
+	private void setMmsg(String mmsg) {
+		this.mmsg = mmsg.replace('&', '§');
+	}
+
 	public boolean isUseLevelChangeHealth() {
 		return useLevelChangeHealth;
 	}
@@ -328,7 +366,6 @@ public class AData {
 	private void setUnNames(Map<String,AAttr> unNames){
 		this.unNames=unNames;
 	}
-	
 	
 	private Map<AAttr, Integer> getDefaults() {
 		return defaults;
@@ -409,7 +446,17 @@ public class AData {
 		int cnt=0;
 		for(int i=0;i<list.size();++i){
 			ItemStack item=list.get(i);
-			List<String> lores=item.getItemMeta().getLore();
+			if(item==null || item.getType().equals(Material.AIR)){
+				continue;
+			}
+			ItemMeta itemm=item.getItemMeta();
+			if(itemm==null){
+				continue;
+			}
+			List<String> lores=itemm.getLore();
+			if(lores==null||lores.isEmpty()){
+				continue;
+			}
 			for(String s:lores){
 				if(!s.contains(":")){
 					continue;
@@ -440,32 +487,18 @@ public class AData {
 		if(name==null)
 			throw new IllegalArgumentException("name cannot be null!");
 		Map<AAttr,Integer> map=getAttrsFromPlayer(name);
-		boolean flag=false;
-		if(map==null){
-			flag=true;
-			map=new HashMap<AAttr,Integer>();
-			AAttr attrs[]=AAttr.values();
-			for(AAttr ta : attrs){
-				map.put(ta,getDefault(ta));
-			}
-			map.put(attr, map.get(attr)+value);
-			getPlayerData().put(name,map);
-		}else{
-			map.put(attr, map.get(attr)+value);
-		}
+		map.put(attr, map.get(attr)+value);
 		if(isDatabaseEnable()){
-			//TODO：数据库写入！
+			ADatabase.updateData(name, attr, map.get(attr));
 		}else{
-			if(flag){
-				getDataConfig().set("players",getDataConfig().getStringList("players").add(name));
-			}
-			getDataConfig().set(name+"."+attr.name(), map.get(attr));
+			getDataConfig().set("name."+name+"."+attr.name(), map.get(attr));
 			try {
 				getDataConfig().save(dataFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+		getPlayerData().put(name,map);
 	}
 	
 	//设置一个玩家的指定属性
@@ -475,11 +508,47 @@ public class AData {
 		setAttrFromPlayer(player.getName(),attr,value);
 	}
 	
+	//添加一个玩家
+	public void addPlayer(Player p){
+		if(isDatabaseEnable()){
+			ADatabase.insertData(p.getName());
+		}else{
+			List<String> list=getDataConfig().getStringList("players");
+			list.add(p.getName());
+			getDataConfig().set("players",list);
+		}
+		Map<AAttr,Integer> map=new HashMap<AAttr,Integer>();
+		AAttr attrs[]=AAttr.values();
+		for(AAttr ta : attrs){
+			map.put(ta,getDefault(ta));
+			if(isDatabaseEnable()){
+				ADatabase.updateData(p.getName(), ta,getDefault(ta));
+			}else{
+				getDataConfig().set("name."+p.getName()+"."+ta.name(),getDefault(ta));
+			}
+		}
+		if(!isDatabaseEnable()){
+			try {
+				getDataConfig().save(dataFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	//判断记录中是否有某个玩家
+	public boolean hasPlayer(Player p){
+		return getPlayerData().containsKey(p.getName());
+	}
+	
+	//重载config.yml和attr.yml
     private void reloadConfig() {
     	dataConfig=reloadConfig("data/attr.yml",dataFile);
     	config=reloadConfig("config.yml",configFile);
     }
     
+  //重载yaml文件
     private FileConfiguration reloadConfig(String local,File file){
 		final InputStream defConfigStream = getMain().getResource(local);
 		if (defConfigStream == null) {
@@ -533,6 +602,7 @@ public class AData {
 		getGUIData();
 		getUIData();
 		getAttrsData();
+		outputInfo("载入完毕！");
 	}
 	
 	//读取GUI数据
@@ -547,8 +617,13 @@ public class AData {
 	//读取UI数据
 	private void getUIData(){
 		setWarn(getConfig().getBoolean("ui.warn"));
+		setBdmsg(getConfig().getString("ui.bdmsg"));
+		setCmsg(getConfig().getString("ui.cmsg"));
+		setHmmsg(getConfig().getString("ui.hmmsg"));
+		setMmsg(getConfig().getString("ui.mmsg"));
 	}
 	
+	//获取test数据
 	private void getTestData(){
 		setUseLevelChangeHealth(getConfig().getBoolean("test.useleveluphealthchange"));
 		setDebug(getConfig().getBoolean("test.debug"));
@@ -564,6 +639,7 @@ public class AData {
 		if(isDatabaseEnable()){
 			ADatabase.init();
 			ADatabase.load();
+			ADatabase.createTable();
 		}
 	}
 
@@ -573,7 +649,7 @@ public class AData {
 		List<AItem> temp=new ArrayList<AItem>(getCount());
 		for(int i=0;i<getCount();++i){
 			temp.add(new AItem(
-					getConfig().getString("list."+(i+1)+".name").replace('&', '§'),
+					getConfig().getString("list."+(i+1)+".name"),
 					getConfig().getStringList("list."+(i+1)+".lore"),
 					getConfig().getString("list."+(i+1)+".id"),
 					getConfig().getInt("list."+(i+1)+".chance"),
@@ -593,7 +669,7 @@ public class AData {
 		setDefaults(new HashMap<AAttr,Integer>());
 		AAttr attrs[]=AAttr.values();
 		for(AAttr attr:attrs){
-			String name=getConfig().getString("more."+attr.name()+".name");
+			String name=getConfig().getString("more."+attr.name()+".name").replace('&', '§');
 			int maxLevel=getConfig().getInt("more."+attr.name()+".maxlevel");
 			int defaultValue=getConfig().getInt("more."+attr.name()+".default");
 			getNames().put(attr,name);
@@ -634,7 +710,7 @@ public class AData {
 			AAttr[] attrs=AAttr.values();
 			Map<AAttr,Integer> map=new HashMap<AAttr,Integer>();
 			for(int j=0;j<attrs.length;++j){
-				int t=getDataConfig().getInt(name+"."+attrs[j].name());
+				int t=getDataConfig().getInt("name."+name+"."+attrs[j].name());
 				map.put(attrs[j], t);
 			}
 			maps.put(name, map);
@@ -644,7 +720,18 @@ public class AData {
 	
 	//读取数据库
 	private void loadDatabaseAttr(){
-		//TODO:读取数据库啊！！
+		Map<String,Map<AAttr,Integer>> maps=new HashMap<String,Map<AAttr,Integer>>();
+		List<String> players=ADatabase.getPlayerList();
+		for(int i=0;i<players.size();++i){
+			String name=players.get(i);
+			Map<AAttr,Integer> map=new HashMap<AAttr,Integer>();
+			AAttr attrs[]=AAttr.values();
+			for(int j=0;j<attrs.length;++j){
+				map.put(attrs[j], ADatabase.getPlayerAttr(name,attrs[j]));
+			}
+			maps.put(name, map);
+		}
+		setPlayerData(maps);
 	}
 	
 	//输出错误
@@ -653,12 +740,18 @@ public class AData {
 		getMain().setError(true);
 	}
 	
-	//输出错误
+	//输出警告
 	public void outputWarning(String msg){
 		getMain().getLogger().log(Level.WARNING, msg);
 	}
 	
-	//输出错误
+	//输出debug
+	public void outputDebug(String msg){
+		if(isDebug())
+			outputInfo("[Debug] "+msg);
+	}
+	
+	//输出信息
 	public void outputInfo(String msg){
 		getMain().getLogger().info(msg);
 	}
